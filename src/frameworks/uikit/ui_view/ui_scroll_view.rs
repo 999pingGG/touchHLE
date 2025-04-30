@@ -6,6 +6,8 @@
 //! `UIScrollView`.
 
 pub mod ui_text_view;
+pub mod ui_table_view;
+
 use crate::frameworks::core_graphics::{CGPoint, CGRect, CGSize};
 use crate::objc::{
     id, impl_HostObject_with_superclass, msg, nil, objc_classes, ClassExports, NSZonePtr, SEL,

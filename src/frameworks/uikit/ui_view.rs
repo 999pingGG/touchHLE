@@ -14,6 +14,7 @@ pub mod ui_image_view;
 pub mod ui_label;
 pub mod ui_picker_view;
 pub mod ui_scroll_view;
+pub mod ui_toolbar;
 pub mod ui_web_view;
 pub mod ui_window;
 
@@ -30,7 +31,7 @@ use crate::objc::{
     autorelease, id, msg, msg_class, nil, objc_classes, release, retain, Class, ClassExports,
     HostObject, NSZonePtr,
 };
-use crate::Environment;
+use crate::{Environment};
 
 #[derive(Default)]
 pub struct State {
@@ -110,6 +111,26 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 + (Class)layerClass {
     env.objc.get_known_class("CALayer", &mut env.mem)
+}
+
++ (())beginAnimations:(id)animationID context:(id)context {
+    log!("TODO: beginAnimations");
+}
+
++ (())setAnimationDuration:(f64)duration { // NSTimeInterval
+    log!("TODO: setAnimationDuration:{}", duration);
+}
+
++ (())commitAnimations {
+    log!("TODO: commitAnimations");
+}
+
++ (())setAnimationDelegate:(id)delegate {
+    log!("TODO: setAnimationDelegate");
+}
+
++ (())setAnimationDidStopSelector:(id)selector { // SEL
+    log!("TODO: setAnimationDidStopSelector");
 }
 
 // TODO: accessors etc
@@ -636,6 +657,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     // default implementation, subclasses can override
     size
 }
+
 - (())sizeToFit {
     log!("TODO: [(UIView *){:?} sizeToFit]", this);
 }

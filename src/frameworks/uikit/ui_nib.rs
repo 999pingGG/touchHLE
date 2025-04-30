@@ -343,7 +343,7 @@ fn load_nib_file(env: &mut Environment, ui_nib: id, path: GuestPathBuf) -> Resul
     let unarchiver = msg![env; unarchiver initForReadingWithData:ns_data];
 
     // ui_nib will hold a file's owner,
-    // which will replace corresponding UIProxyObject
+    // which will replace the corresponding UIProxyObject
     () = msg![env; unarchiver setDelegate:ui_nib];
 
     // The top-level keys in a nib file's keyed archive appear to be

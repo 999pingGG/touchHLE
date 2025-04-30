@@ -222,7 +222,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     let bounds: CGRect = msg![env; this bounds];
     let context = UIGraphicsGetCurrentContext(env);
 
-    let &mut UILabelHostObject {
+    let &UILabelHostObject {
         superclass: _,
         text,
         font,
@@ -230,7 +230,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         text_alignment,
         line_break_mode,
         number_of_lines,
-    } = env.objc.borrow_mut(this);
+    } = env.objc.borrow(this);
 
     let (r, g, b, a) = ui_color::get_rgba(&env.objc, text_color);
     CGContextSetRGBFillColor(env, context, r, g, b, a);

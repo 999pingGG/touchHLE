@@ -19,6 +19,7 @@ use crate::objc::{
 use crate::Environment;
 
 pub mod ui_navigation_controller;
+pub mod ui_table_view_controller;
 
 #[derive(Default)]
 struct UIViewControllerHostObject {
@@ -29,10 +30,15 @@ struct UIViewControllerHostObject {
     /// of the root view, may be nil.
     /// `NSString*`
     nib_name: id,
-    /// Bundle to be used for load
-    /// of the nib by name, may be nil.
+    /// Bundle to be used for loading
+    /// the nib by name, may be nil.
     /// `NSBundle*`
     bundle: id,
+    /// The unique instance of UINavigationItem
+    /// created to represent the view controller
+    /// when it is pushed onto a navigation controller.
+    /// `UINavigationItem*`
+    navigationItem: id,
 }
 impl HostObject for UIViewControllerHostObject {}
 
@@ -71,11 +77,17 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (())dealloc {
-    let &UIViewControllerHostObject { view, nib_name, bundle } = env.objc.borrow(this);
+    let &UIViewControllerHostObject {
+        view,
+        nib_name,
+        bundle,
+        navigationItem
+    } = env.objc.borrow(this);
 
     release(env, view);
     release(env, nib_name);
     release(env, bundle);
+    release(env, navigationItem);
 
     env.objc.dealloc_object(this, &mut env.mem);
 }
@@ -90,7 +102,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 
     let nib_name: id = get_nib_name(env, this, bundle);
     if nib_name != nil {
-        // If we do have nib name, try to load it!
+        // If we do have a nib name, try to load it!
         log_dbg!(
             "Load {:?} view controller's view by nib, using name {}", this, to_rust_string(env, nib_name)
         );
@@ -104,7 +116,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 
         let view = env.objc.borrow::<UIViewControllerHostObject>(this).view;
         // Having nil view at this point probably mean that
-        // out nib's parsing is wrong.
+        // our nib's parsing is wrong.
         // Also we assume here the case of a "detached nib file"
         // TODO: support "integrated nib file"
         assert!(view != nil);
@@ -117,7 +129,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     log!("Unable to load {:?} {} view controller's view by nib, using plain UIView", this, env.objc.get_class_name(class).to_string());
     let view: id = msg_class![env; UIView alloc];
     // Docs are saying that "an empty UIView" is created,
-    // but testing reveals that frame matches the screen one
+    // but testing reveals that the frame matches the screen one
     // (at least on the simulator)
     let screen: id = msg_class![env; UIScreen mainScreen];
     let app_frame: CGRect = msg![env; screen applicationFrame];
@@ -137,6 +149,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     retain(env, new_view);
     release(env, old_view);
 }
+
 - (id)view {
     let view = env.objc.borrow_mut::<UIViewControllerHostObject>(this).view;
     if view == nil {
@@ -169,6 +182,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())setTitle:(id)title { // NSString *
     log!("TODO: [(UIViewController*){:?} setTitle:{}]", this, to_rust_string(env, title)); // TODO
 }
+
 - (())setEditing:(bool)editing {
     log!("TODO: [(UIViewController*){:?} setEditing:{}]", this, editing); // TODO
 }
@@ -177,14 +191,23 @@ pub const CLASSES: ClassExports = objc_classes! {
     log!("TODO: [(UIViewController*){:?} dismissModalViewControllerAnimated:{}]", this, animated); // TODO
 }
 
+- (id)navigationItem {
+    let mut navigationItem = env.objc.borrow_mut::<UIViewControllerHostObject>(this).navigationItem;
+    if navigationItem == nil {
+        navigationItem = msg_class![env; UINavigationItem alloc];
+    }
+
+    navigationItem
+}
+
 @end
 
 };
 
-/// A helper function to resolve suitable NIB name for a `view_controller`
-/// in the `bundle`. Returns nil if fails.
+/// A helper function to resolve a suitable NIB name for a `view_controller`
+/// in the `bundle`. Returns nil if it fails.
 ///
-/// Note: It's a responsibility of a caller to release the returned name
+/// Note: It's the responsibility of the caller to release the returned name
 /// if not-nil!
 fn get_nib_name(env: &mut Environment, view_controller: id, bundle: id) -> id {
     let provider_nib_name: id = env

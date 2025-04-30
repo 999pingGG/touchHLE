@@ -143,11 +143,11 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (id)navigationBar {
-    // TODO
+    log!("TODO: navigationBar");
     nil
 }
 - (())setNavigationBarHidden:(bool)_hidden {
-    // TODO
+    log!("TODO: setNavigationBarHidden");
 }
 
 @end

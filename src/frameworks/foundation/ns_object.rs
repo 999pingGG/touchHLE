@@ -322,6 +322,15 @@ forUndefinedKey:(id)key { // NSString*
     msg![env; this performSelector:sel withObject:arg afterDelay:0.0]
 }
 
+- (bool)conformsToProtocol:(id)protocol {
+    log!("TODO: [(NSObject*){:?} conformsToProtocol:(Protocol*){:?}]", this, protocol);
+    true
+}
+
+- (())cancelPreviousPerformRequestsWithTarget:(id)aTarget {
+    log!("TODO: [(NSObject*){:?} cancelPreviousPerformRequestsWithTarget:(id){:?}]", this, aTarget);
+}
+
 // Private method, used by performSelectorOnMainThread:withObject:waitUntilDone:
 - (())_touchHLE_timerFireMethod:(id)which { // NSTimer *
     let dict: id = msg![env; which userInfo];
